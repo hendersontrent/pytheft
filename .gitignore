@@ -224,3 +224,6 @@ doc
 Meta
 /doc/
 /Meta/
+
+# Benchmark feature caches and results
+/benchmarks/

@@ -9,13 +9,14 @@ import numpy as np
 from pytheft.feature_sets._base import FeatureSet
 from pytheft.feature_sets._catch22 import Catch22
 from pytheft.feature_sets._hctsa import HCTSA
+from pytheft.feature_sets._kats import Kats
 from pytheft.feature_sets._tsfel import TSFEL
 from pytheft.feature_sets._tsfresh import TSFresh
 from pytheft.feature_sets._user import UserFeatures
 
-__all__ = ["HCTSA", "TSFEL", "Catch22", "FeatureSet", "TSFresh"]
+__all__ = ["HCTSA", "TSFEL", "Catch22", "FeatureSet", "Kats", "TSFresh"]
 
-_BY_NAME: dict[str, type[FeatureSet]] = {cls.name: cls for cls in (Catch22, HCTSA, TSFEL, TSFresh)}
+_BY_NAME: dict[str, type[FeatureSet]] = {cls.name: cls for cls in (Catch22, HCTSA, Kats, TSFEL, TSFresh)}
 
 
 def resolve_feature_sets(

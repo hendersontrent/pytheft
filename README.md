@@ -7,6 +7,7 @@ Tools for Handling Extraction of Features from Time series (`theft`), in Python.
 - [catch22](https://github.com/DynamicsAndNeuralSystems/pycatch22): 22 features
 - [tsfresh](https://tsfresh.com): 783 features
 - [TSFEL](https://tsfel.readthedocs.io): 156 features
+- [Kats](https://github.com/facebookresearch/Kats): 40 features
 - [hctsa](https://github.com/DynamicsAndNeuralSystems/pyhctsa): over 5,000 features
 
 Support is also provided for users to supply their own feature calculation functions.
@@ -73,7 +74,7 @@ cross_val_score(pipeline, X, y, cv=5)
 
 ## Parallel processing and messages
 
-The `n_jobs` argument sets the number of processes used by `tsfresh`, `tsfel`, and `hctsa`.
+The `n_jobs` argument sets the number of processes used by `tsfresh`, `tsfel`, `kats`, and `hctsa`.
 
 ## Citation
 
