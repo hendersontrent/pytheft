@@ -165,7 +165,7 @@ def test_feature_set_names_are_case_insensitive():
 @pytest.mark.parametrize(
     ("kwargs", "error", "match"),
     [
-        ({"feature_set": "kats"}, ValueError, "choose from catch22, hctsa, tsfel, tsfresh"),
+        ({"feature_set": "feasts"}, ValueError, "choose from catch22, hctsa, kats, tsfel, tsfresh"),
         ({"feature_set": None}, ValueError, "No features requested"),
         ({"feature_set": [Stats(), Stats()]}, ValueError, "only be requested once"),
         ({"feature_set": [np.mean]}, TypeError, "feature_set entries"),
