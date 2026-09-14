@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytheft"
+dynamic = ["version"]
+description = "Tools for Handling Extraction of Features from Time series (theft), in Python"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Trent Henderson" }]
+keywords = ["time series", "feature extraction", "catch22", "tsfresh", "tsfel", "hctsa"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+]
+
+[project.optional-dependencies]
+catch22 = ["pycatch22>=0.4.5"]
+tsfresh = ["tsfresh>=0.20"]
+tsfel = ["tsfel>=0.2"]
+hctsa = ["pyhctsa>=1.1"]
+all = ["pytheft[catch22,tsfresh,tsfel,hctsa]"]
+
+[project.urls]
+"theft (R package)" = "https://github.com/hendersontrent/theft"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.hatch.version]
+path = "src/pytheft/__init__.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
