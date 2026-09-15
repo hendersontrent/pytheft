@@ -9,7 +9,7 @@ description = "Tools for Handling Extraction of Features from Time series (theft
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Trent Henderson" }]
-keywords = ["time series", "feature extraction", "catch22", "tsfresh", "tsfel", "kats", "hctsa"]
+keywords = ["time series", "feature extraction", "catch22", "tsfresh", "tsfel", "kats", "tsfeatures", "hctsa"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -28,8 +28,9 @@ catch22 = ["pycatch22>=0.4.5"]
 tsfresh = ["tsfresh>=0.20"]
 tsfel = ["tsfel>=0.2"]
 kats = ["scipy>=1.9", "statsmodels>=0.13"]
+tsfeatures = ["tsfeatures>=0.4.5"]
 hctsa = ["pyhctsa>=1.1"]
-all = ["pytheft[catch22,tsfresh,tsfel,kats,hctsa]"]
+all = ["pytheft[catch22,tsfresh,tsfel,kats,tsfeatures,hctsa]"]
 
 [project.urls]
 "theft (R package)" = "https://github.com/hendersontrent/theft"

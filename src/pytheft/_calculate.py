@@ -47,7 +47,8 @@ def calculate_features(
           ``time_col`` and ``group_col``.
     feature_set : str, FeatureSet or list of these, default="catch22"
         Feature sets to compute: any of ``"catch22"``, ``"tsfresh"``,
-        ``"tsfel"`` and ``"hctsa"`` (case-insensitive), or configured
+        ``"tsfel"``, ``"kats"``, ``"tsfeatures"`` and ``"hctsa"``
+        (case-insensitive), or configured
         instances such as ``Catch22(catch24=True)``. Pass ``None`` to compute
         only the functions in ``features``.
     features : dict, optional
@@ -68,8 +69,8 @@ def calculate_features(
         ``ddof=1``, as in R's ``scale``) before computing features.
     n_jobs : int, optional
         Number of processes for feature sets that support parallelism
-        (tsfresh, TSFEL and hctsa). ``None`` means 1 and ``-1`` means all
-        CPUs. Scripts using more than one process need an
+        (tsfresh, TSFEL, Kats, tsfeatures and hctsa). ``None`` means 1 and
+        ``-1`` means all CPUs. Scripts using more than one process need an
         ``if __name__ == "__main__":`` guard.
     verbose : bool, default=False
         Print progress and show the feature libraries' own output and
