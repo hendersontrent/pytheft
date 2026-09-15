@@ -3,13 +3,17 @@
 Tests for a library are skipped when it is not installed.
 """
 
+import importlib.util
+import subprocess
+import sys
 from importlib.resources import files
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from pytheft import HCTSA, TSFEL, Catch22, PyTheftWarning, TSFresh, calculate_features, to_wide
+from pytheft import HCTSA, TSFEL, Catch22, PyTheftWarning, TSFeatures, TSFresh, calculate_features, to_wide
+from pytheft.feature_sets import _tsfeatures as _tsfeatures_module
 from pytheft.feature_sets._hctsa import _clean_output
 
 
@@ -82,6 +86,83 @@ def test_tsfel_skips_series_that_are_too_short(unequal_series):
     with pytest.warns(PyTheftWarning, match="needs at least 12 values"):
         features = calculate_features({**unequal_series, "short": np.arange(8.0)}, "tsfel")
     assert set(features["id"]) == set(unequal_series)
+
+
+def _import_tsfeatures():
+    # pytest.importorskip would let tsfeatures disable warnings.warn for the rest of the session.
+    if importlib.util.find_spec("tsfeatures") is None:
+        pytest.skip("tsfeatures is not installed")
+    return _tsfeatures_module._import_tsfeatures()
+
+
+@pytest.mark.filterwarnings("ignore")
+@pytest.mark.parametrize("freq", [1, 12])
+def test_tsfeatures_matches_tsfeatures(unequal_series, freq):
+    tsfeatures = _import_tsfeatures()
+    wide = to_wide(calculate_features(unequal_series, TSFeatures(freq=freq)))
+    long = pd.concat(
+        pd.DataFrame({"unique_id": key, "ds": np.arange(len(x)), "y": x}) for key, x in unequal_series.items()
+    )
+    expected = tsfeatures.tsfeatures(long, freq=freq, threads=1).set_index("unique_id").loc[list(unequal_series)]
+    expected.columns = ["tsfeatures__" + column for column in expected.columns]
+
+    assert wide.shape == (3, 37 if freq == 1 else 42)
+    assert wide.index.tolist() == list(unequal_series)
+    pd.testing.assert_frame_equal(wide, expected[wide.columns].astype(float), check_names=False)
+
+
+def test_tsfeatures_options(unequal_series):
+    _import_tsfeatures()
+    wide = to_wide(calculate_features(unequal_series, TSFeatures(features=["intervals", "statistics"])))
+    assert wide.columns.tolist()[:4] == [f"tsfeatures__{name}" for name in ("intervals_mean", "intervals_sd", "total_sum", "mean")]
+    # intervals modifies its input, which must not change the features computed after it.
+    np.testing.assert_allclose(wide["tsfeatures__mean"], 0, atol=1e-12)
+
+    unscaled = to_wide(calculate_features(unequal_series, TSFeatures(features=["statistics"], scale=False)))
+    np.testing.assert_allclose(unscaled["tsfeatures__mean"], [x.mean() for x in unequal_series.values()])
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error", "match"),
+    [
+        ({"features": ["not_a_function"]}, ValueError, "Unknown tsfeatures function"),
+        ({"features": "entropy"}, TypeError, "must be a list"),
+        ({"features": []}, ValueError, "at least one"),
+        ({"freq": 0}, ValueError, "positive integer"),
+        ({"scale": "yes"}, TypeError, "True or False"),
+    ],
+)
+def test_tsfeatures_invalid_options(kwargs, error, match):
+    with pytest.raises(error, match=match):
+        calculate_features(np.ones((1, 50)), TSFeatures(**kwargs))
+
+
+def test_tsfeatures_skips_series_too_short_for_guerrero(unequal_series):
+    _import_tsfeatures()
+    with pytest.warns(PyTheftWarning, match=r"needs at least 13 values\): 'short'"):
+        features = calculate_features({**unequal_series, "short": np.arange(1.0, 13.0)}, TSFeatures(["guerrero"], 12))
+    assert set(features["id"]) == set(unequal_series)
+
+
+def test_tsfeatures_import_leaves_the_process_unchanged():
+    if importlib.util.find_spec("tsfeatures") is None:
+        pytest.skip("tsfeatures is not installed")
+    # A new process, because tsfeatures changes the process only the first time it is imported.
+    code = (
+        "import os, warnings, numpy as np\n"
+        "from pytheft.feature_sets._tsfeatures import _import_tsfeatures\n"
+        "before = (warnings.warn, np.geterr(), os.environ.get('OMP_NUM_THREADS'))\n"
+        "_import_tsfeatures()\n"
+        "assert before == (warnings.warn, np.geterr(), os.environ.get('OMP_NUM_THREADS'))\n"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)
+
+
+def test_tsfeatures_parallel_matches_sequential(unequal_series):
+    _import_tsfeatures()
+    sequential = calculate_features(unequal_series, "tsfeatures")
+    parallel = calculate_features(unequal_series, "tsfeatures", n_jobs=2)
+    pd.testing.assert_frame_equal(sequential, parallel)
 
 
 def _hctsa_module_config(module: str) -> str:
